@@ -114,7 +114,7 @@ export function check(projectRoot) {
   if (hasPackageJson || detectedLanguages.length === 0) {
     const hasTsLsp = !!run("typescript-language-server --version");
     checks.push({
-      name: "TypeScript LSP",
+      name: "TypeScript LSP（可选）",
       ok: hasTsLsp,
       hint: hasTsLsp ? "" : "未安装，执行 npm install -g typescript-language-server",
     });
@@ -123,7 +123,7 @@ export function check(projectRoot) {
   if (hasPyprojectToml) {
     const hasPyright = !!run("pyright-langserver --version") || !!run("pyright --version");
     checks.push({
-      name: "Python LSP (pyright)",
+      name: "Python LSP (pyright)（可选）",
       ok: hasPyright,
       hint: hasPyright ? "" : "未安装，执行 pip install pyright",
     });
@@ -132,7 +132,7 @@ export function check(projectRoot) {
   if (hasGoMod) {
     const hasGopls = !!run("gopls version");
     checks.push({
-      name: "Go LSP (gopls)",
+      name: "Go LSP (gopls)（可选）",
       ok: hasGopls,
       hint: hasGopls ? "" : "未安装，执行 go install golang.org/x/tools/gopls@latest",
     });

@@ -26,7 +26,7 @@ Harness Starter 具备所有 loop 零件。以下是三个拿来即用的组装�
 1. 跑 node scripts/check.mjs，记录结果
 2. 跑 node scripts/gc-scan.mjs --json，检查关键告警
 3. 检查 git 未提交文件数，超过 10 则提示
-4. 检查 .claude/reviews/ 下最新的审查报告
+4. 检查 docs/handovers/ 下最新的交接卡
 5. 写入 .claude/loops/STATE.md 更新状态
 6. 有异常 → 输出摘要到控制台
    一切正常 → 静默结束

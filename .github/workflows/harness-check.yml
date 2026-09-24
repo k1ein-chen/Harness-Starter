@@ -15,7 +15,7 @@ jobs:
       - name: Syntax check hooks and scripts
         run: |
           set -e
-          find .claude/hooks scripts -name '*.mjs' -print0 | while IFS= read -r -d '' f; do
+          find .agents/hooks scripts -name '*.mjs' -print0 | while IFS= read -r -d '' f; do
             echo "node --check $f"
             node --check "$f"
           done

@@ -28,6 +28,6 @@
 
 - **PostToolUse 自动格式化** — 已内置。项目中有 prettier/biome 时自动生效。
 - **PreCompact Hook** — 已内置。长会话保护。
-- **自定义 Hook** — 在 `.claude/hooks/` 下创建 `.mjs` 文件，在 `settings.json` 中注册。
-- **自定义 Skill** — 在 `.claude/skills/` 下创建目录 + `SKILL.md`。
+- **自定义 Hook** — 在 `.agents/hooks/` 下创建 `.mjs` 文件，在 `settings.json` 中注册。
+- **自定义 Skill** — 在 `.agents/skills/` 下创建目录 + `SKILL.md`。
 - **自定义 Loop** — 参考 `loop-templates.md` 编写自己的自动化脚本。
