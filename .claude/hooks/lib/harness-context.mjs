@@ -11,9 +11,15 @@ import { join } from "path";
 
 // ── 内部工具 ──
 
+// 跨平台执行：stderr 静默丢弃，避免依赖 Unix 重定向（Windows cmd 不支持）
 const run = (cmd, projectRoot, timeout = 3000) => {
   try {
-    return execSync(cmd, { cwd: projectRoot, encoding: "utf-8", timeout }).trim();
+    return execSync(cmd, {
+      cwd: projectRoot,
+      encoding: "utf-8",
+      timeout,
+      stdio: ["pipe", "pipe", "ignore"],
+    }).trim();
   } catch {
     return "";
   }
@@ -26,7 +32,7 @@ const run = (cmd, projectRoot, timeout = 3000) => {
  * @returns {{ branch: string, status: string, changedFiles: string[], lastCommit: string } | null}
  */
 export function getGitContext(projectRoot) {
-  const gitRoot = run("git rev-parse --show-toplevel 2>/dev/null", projectRoot);
+  const gitRoot = run("git rev-parse --show-toplevel", projectRoot);
   if (!gitRoot) return null;
 
   const branch = run("git rev-parse --abbrev-ref HEAD", projectRoot) || "unknown";

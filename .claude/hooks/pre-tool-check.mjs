@@ -62,6 +62,9 @@ if (!isTweak && !isDesign) {
       }));
       process.exit(0);
     }
+  }
+}
+
 // OpenSpec 感知检查（可选，由 HARNESS_OPENSPEC_CHECK=1 开启）
 if (process.env.HARNESS_OPENSPEC_CHECK === "1" && (tool === "Write" || tool === "Edit")) {
   const openspecDir = join(projectRoot, "openspec");

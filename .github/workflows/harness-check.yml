@@ -12,6 +12,13 @@ jobs:
           node-version: 20
       - name: Install dependencies
         run: npm ci
+      - name: Syntax check hooks and scripts
+        run: |
+          set -e
+          find .claude/hooks scripts -name '*.mjs' -print0 | while IFS= read -r -d '' f; do
+            echo "node --check $f"
+            node --check "$f"
+          done
       - name: Run harness health check
         run: node scripts/check.mjs
       - name: Run tests

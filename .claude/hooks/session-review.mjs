@@ -1,5 +1,5 @@
-import { execSync } from "child_process";
-import { readFileSync, existsSync, mkdirSync, writeFileSync } from "fs";
+import { execSync, spawnSync } from "child_process";
+import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -20,12 +20,29 @@ const isFix = harnessState.phase === "fix";
 const isHotfix = harnessState.mode === "hotfix";
 const isTweak = harnessState.mode === "tweak";
 
+// 跨平台执行：stderr 静默丢弃，避免依赖 Unix 重定向（Windows cmd 不支持）
 const run = (cmd) => {
   try {
-    return execSync(cmd, { cwd: projectRoot, encoding: "utf-8", timeout: 8000 }).trim();
+    return execSync(cmd, {
+      cwd: projectRoot,
+      encoding: "utf-8",
+      timeout: 8000,
+      stdio: ["pipe", "pipe", "ignore"],
+    }).trim();
   } catch {
     return "";
   }
+};
+
+// 合并 stdout+stderr（替代 shell 的 2>&1），失败时也返回已捕获输出
+const runMerged = (cmd) => {
+  const r = spawnSync(cmd, {
+    cwd: projectRoot,
+    encoding: "utf-8",
+    timeout: 8000,
+    shell: true,
+  });
+  return ((r.stdout || "") + (r.stderr || "")).trim();
 };
 
 // 1. 统计改动
@@ -70,7 +87,7 @@ const debugHits = debugPatterns.filter(p => p.test(diffContent)).map(p => {
 });
 
 // 6. 未提交变更检查
-const hasUncommitted = !!run("git status --short 2>/dev/null");
+const hasUncommitted = !!run("git status --short");
 
 // 7. 依赖变更检查
 const changedFiles = run("git diff --name-only").split("\n").concat(run("git diff --cached --name-only").split("\n")).filter(Boolean);
@@ -80,12 +97,18 @@ const depChanged = depFiles.some(d => changedFiles.some(f => f.endsWith(d)));
 const lockChanged = lockFiles.some(l => changedFiles.some(f => f.endsWith(l)));
 const depWithoutLock = depChanged && !lockChanged;
 
-// 8. OpenSpec 验证
+// 8. OpenSpec 验证（Node 原生列目录，不依赖 ls/grep）
 const hasOpenSpec = existsSync(join(projectRoot, "openspec"));
-const pendingChanges = hasOpenSpec
-  ? run("ls openspec/changes/ 2>/dev/null | grep -v archive | grep -v '^\\.'") || ""
-  : "";
-const openspecValidate = hasOpenSpec ? run("openspec validate 2>&1") : "";
+let pendingChanges = "";
+if (hasOpenSpec) {
+  const changesDir = join(projectRoot, "openspec", "changes");
+  if (existsSync(changesDir)) {
+    pendingChanges = readdirSync(changesDir)
+      .filter((f) => f !== "archive" && !f.startsWith("."))
+      .join("\n");
+  }
+}
+const openspecValidate = hasOpenSpec ? runMerged("openspec validate") : "";
 const openspecPassed = openspecValidate && !openspecValidate.includes("error") && !openspecValidate.includes("FAIL");
 
 // 写入报告

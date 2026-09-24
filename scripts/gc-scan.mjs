@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * gc-scan.mjs — Harness Starter GC 扫描器
  *
@@ -37,8 +36,28 @@ export async function scan(projectRoot, options = {}) {
 
   const run = (cmd, opts = {}) => {
     try {
-      return execSync(cmd, { cwd: root, encoding: "utf-8", timeout: 5000, ...opts }).trim();
+      return execSync(cmd, {
+        cwd: root,
+        encoding: "utf-8",
+        timeout: 5000,
+        stdio: ["pipe", "pipe", "ignore"],
+        ...opts,
+      }).trim();
     } catch { return ""; }
+  };
+
+  // Capture stdout+stderr even when the command fails (replaces shell redirect combo)
+  const runAllowFail = (cmd) => {
+    try {
+      return execSync(cmd, {
+        cwd: root,
+        encoding: "utf-8",
+        timeout: 30000,
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
+    } catch (e) {
+      return [e.stdout, e.stderr].filter(Boolean).join("\n").trim();
+    }
   };
 
   const findings = [];
@@ -67,7 +86,7 @@ export async function scan(projectRoot, options = {}) {
 
   // ── 2. Git 状态 ────────────────────────────
 
-  const gitRoot = run("git rev-parse --show-toplevel 2>/dev/null");
+  const gitRoot = run("git rev-parse --show-toplevel");
   if (gitRoot) {
     const uncommitted = run("git status --short");
     const uncommittedLines = uncommitted.split("\n").filter(Boolean);
@@ -166,7 +185,7 @@ export async function scan(projectRoot, options = {}) {
   // ── 7. TypeScript 类型检查 ────────────────
 
   if (existsSync(join(root, "tsconfig.json"))) {
-    const tscResult = run("npx tsc --noEmit 2>&1 || true");
+    const tscResult = runAllowFail("npx tsc --noEmit");
     const errors = (tscResult.match(/error TS\d+/g) || []).length;
     if (errors > 0) {
       addFinding("tsc_errors", "warning", "(tsc --noEmit)", 0, "类型错误: " + errors + " 个", tscResult.split("\n").slice(0, 5).join("\n"));

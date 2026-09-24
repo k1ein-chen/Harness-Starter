@@ -17,7 +17,8 @@ export function check(projectRoot) {
 
   const run = (cmd) => {
     try {
-      return execSync(cmd, { stdio: "pipe", timeout: 3000 }).toString().trim();
+      // stdio pipe 静默 stderr，避免依赖 Unix 重定向（Windows cmd 不支持）
+      return execSync(cmd, { stdio: ["pipe", "pipe", "ignore"], timeout: 3000 }).toString().trim();
     } catch {
       return "";
     }
@@ -79,28 +80,28 @@ export function check(projectRoot) {
   // ── 语言服务检查（按项目类型）────────────
 
   if (hasPackageJson) {
-    const hasTsLsp = !!run("typescript-language-server --version 2>/dev/null");
+    const hasTsLsp = !!run("typescript-language-server --version");
     checks.push({ name: "TypeScript LSP", ok: hasTsLsp, hint: hasTsLsp ? "" : "未安装，执行 npm install -g typescript-language-server" });
   }
 
   if (hasPyprojectToml) {
-    const hasPyright = !!run("pyright-langserver --version 2>/dev/null || pyright --version 2>/dev/null");
+    const hasPyright = !!run("pyright-langserver --version") || !!run("pyright --version");
     checks.push({ name: "Python LSP (pyright)", ok: hasPyright, hint: hasPyright ? "" : "未安装，执行 pip install pyright" });
   }
 
   if (hasGoMod) {
-    const hasGopls = !!run("gopls version 2>/dev/null");
+    const hasGopls = !!run("gopls version");
     checks.push({ name: "Go LSP (gopls)", ok: hasGopls, hint: hasGopls ? "" : "未安装，执行 go install golang.org/x/tools/gopls@latest" });
   }
 
   if (hasCargoToml) {
-    const hasRustAnalyzer = !!run("rust-analyzer --version 2>/dev/null");
+    const hasRustAnalyzer = !!run("rust-analyzer --version");
     checks.push({ name: "Rust LSP (rust-analyzer)", ok: hasRustAnalyzer, hint: hasRustAnalyzer ? "" : "未安装，参考 https://rust-analyzer.github.io/manual.html" });
   }
 
   // 未检测到项目类型时，默认检查 TypeScript LSP
   if (detectedLanguages.length === 0) {
-    const hasTsLsp = !!run("typescript-language-server --version 2>/dev/null");
+    const hasTsLsp = !!run("typescript-language-server --version");
     checks.push({ name: "TypeScript LSP（默认）", ok: hasTsLsp, hint: hasTsLsp ? "" : "未安装，执行 npm install -g typescript-language-server" });
   }
 

@@ -26,18 +26,18 @@ const skipPatterns = (process.env.HARNESS_POSTTOOL_FORMAT_SKIP_PATTERNS || "")
 const FORMATTERS = [
   {
     check: "node_modules/.bin/prettier",
-    checkCmd: (f) => `npx prettier --check "${f}" 2>/dev/null`,
-    writeCmd: (f) => `npx prettier --write "${f}" 2>/dev/null`,
+    checkCmd: (f) => `npx prettier --check "${f}"`,
+    writeCmd: (f) => `npx prettier --write "${f}"`,
   },
   {
     check: ".prettierrc",
-    checkCmd: (f) => `npx prettier --check "${f}" 2>/dev/null`,
-    writeCmd: (f) => `npx prettier --write "${f}" 2>/dev/null`,
+    checkCmd: (f) => `npx prettier --check "${f}"`,
+    writeCmd: (f) => `npx prettier --write "${f}"`,
   },
   {
     check: "node_modules/.bin/biome",
-    checkCmd: (f) => `npx biome format --check "${f}" 2>/dev/null`,
-    writeCmd: (f) => `npx biome format --write "${f}" 2>/dev/null`,
+    checkCmd: (f) => `npx biome format --check "${f}"`,
+    writeCmd: (f) => `npx biome format --write "${f}"`,
   },
 ];
 

@@ -10,22 +10,21 @@ import { describe, it, expect, vi } from "vitest";
 import { scan } from "../scripts/gc-scan.mjs";
 import { createVirtualProject, Fixtures } from "./setup.mjs";
 
-// ── Mock child_process（使用 vi.hoisted 解决 hoisting 问题）──
+// Mock child_process via globalThis mutable state
+const mockExecResults = globalThis.__gcMockExecResults || (globalThis.__gcMockExecResults = {});
 
-const { mockExecResults } = vi.hoisted(() => ({ mockExecResults: {} }));
-
-vi.mock("child_process", () => ({
-  execSync: vi.fn((cmd, opts) => {
+vi.mock('child_process', () => ({
+  execSync: (cmd, opts) => {
     const cmdStr = String(cmd);
-    for (const [pattern, result] of Object.entries(mockExecResults)) {
+    const results = globalThis.__gcMockExecResults || {};
+    for (const [pattern, result] of Object.entries(results)) {
       if (cmdStr.includes(pattern)) {
         if (result instanceof Error) throw result;
-        // execSync 在指定 encoding 时返回 string，否则返回 Buffer
         return opts && opts.encoding ? String(result) : Buffer.from(String(result));
       }
     }
-    return opts && opts.encoding ? "" : Buffer.from("");
-  }),
+    return opts && opts.encoding ? '' : Buffer.from('');
+  },
 }));
 
 function setMockGit(overrides = {}) {

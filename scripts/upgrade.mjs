@@ -9,7 +9,7 @@
  *   node scripts/upgrade.mjs --dry-run    # 仅预览变更
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "fs";
 import { join, dirname, relative } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
@@ -102,12 +102,12 @@ try {
 // 2. 下载最新模板
 console.log(`📥 正在拉取 ${REPO}@${REF} ...`);
 try {
-  const tarCmd = `git archive --format=tar --remote=https://github.com/${REPO}.git ${REF} 2>/dev/null`;
-  execSync(tarCmd, { encoding: "base64", timeout: 15000 });
+  const tarCmd = `git archive --format=tar --remote=https://github.com/${REPO}.git ${REF}`;
+  execSync(tarCmd, { encoding: "base64", timeout: 15000, stdio: ["pipe", "pipe", "ignore"] });
 } catch {
   console.log("⚠️  无法直接拉取，尝试 clone 方式 ...");
   if (existsSync(TMP_DIR)) {
-    try { execSync(`rm -rf "${TMP_DIR}"`); } catch {}
+    try { rmSync(TMP_DIR, { recursive: true, force: true }); } catch {}
   }
   execSync(`git clone --depth 1 --branch ${REF} https://github.com/${REPO}.git "${TMP_DIR}"`, { stdio: "pipe" });
 }
@@ -253,6 +253,6 @@ cleanup();
 
 function cleanup() {
   if (existsSync(TMP_DIR)) {
-    try { execSync(`rm -rf "${TMP_DIR}"`); } catch {}
+    try { rmSync(TMP_DIR, { recursive: true, force: true }); } catch {}
   }
 }
