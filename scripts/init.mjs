@@ -36,8 +36,12 @@ const FILES = [
   { src: "scripts/init.mjs", dir: false },
   { src: "scripts/gc-scan.mjs", dir: false },
 
-  // 3. HDD 交付中心
+  // 3. HDD 交付中心与指南
   { src: "docs/handovers/README.md", dir: false },
+  { src: "docs/guides/goal-definition-guide.md", dir: false },
+  { src: "docs/guides/maturity-roadmap.md", dir: false },
+  { src: "docs/guides/loop-templates.md", dir: false },
+  { src: "docs/guides/extension-catalog.md", dir: false },
 
   // 4. Hook 路由配置
   { src: ".claude/settings.json", dir: false },

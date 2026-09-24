@@ -17,4 +17,4 @@
 - **L1 → L2**：确保 `.claude/settings.json` 中注册了 PreToolUse、SessionStart、Stop 三个 Hook
 - **L2 → L3**：启用 PostToolUse（自动格式化）和 PreCompact（长会话保护）Hook
 - **L3 → L4**：运行 `node scripts/gc-scan.mjs` 修复所有 critical 发现项，设置定时 loop
-- **L4 → L5**：参考 `.claude/references/loop-templates.md` 组装自己的外循环流水线
+- **L4 → L5**：参考 `docs/guides/loop-templates.md` 组装自己的外循环流水线

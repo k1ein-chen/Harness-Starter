@@ -19,7 +19,7 @@
 - **Worktree 隔离** — 并行 Agent 场景下用 `EnterWorktree` 隔离文件变更。
   - 详见：[Addy Osmani: Loop Engineering](https://addyosmani.com/blog/loop-engineering/)
 
-- **Loop 场景模板** — `.claude/references/loop-templates.md` 提供三种开箱即用的外循环模板：
+- **Loop 场景模板** — `docs/guides/loop-templates.md` 提供三种开箱即用的外循环模板：
   1. 每日健康巡检（24h 间隔）
   2. PR 自动 babysit（30min 间隔）
   3. 自我进化循环（7 天间隔）

@@ -68,9 +68,9 @@ your-project/
 ├── .lsp.json                  # Language Server configuration
 ├── .gitignore                  # Git ignore rules
 │
-├── docs/                      # 🌟 HDD Engineering Handover Center
-│   └── handovers/
-│       └── README.md          # Reverse chronological index table
+├── docs/                      # 📚 Documentation & Deliverables Center
+│   ├── handovers/             #   - HDD Engineering Handover (README.md index table)
+│   └── guides/                #   - Core Engineering Guides (Maturity Roadmap / Goals / Loops)
 │
 ├── scripts/                   # 🌟 Universal Deterministic Tooling (Pure Node.js)
 │   ├── check.mjs              # Environment & setup health check
@@ -86,10 +86,11 @@ your-project/
 │   │   ├── pre-compact.mjs    # (L3 optional) Memory compaction snapshot
 │   │   └── lib/harness-context.mjs # Shared context library
 │   └── skills/
-│       └── handover/          # HDD skill (ADR / SOP / Handover templates)
+│       └── handover/          # HDD universal skill (ADR / SOP / Handover templates)
 │
-└── .claude/                   # 🌟 Claude Code Runtime Connection
-    └── settings.json          # Hook routing registry
+└── .claude/                   # 🔌 Claude Code First-Class Adapter Layer
+    ├── settings.json          # Hook routing registry
+    └── skills/                # Claude native Slash commands (harness-init / harness-mode, etc.)
 ```
 
 ---

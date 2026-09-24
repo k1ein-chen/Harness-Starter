@@ -93,9 +93,9 @@ your-project/
 ├── .lsp.json                  # LSP 语言服务配置
 ├── .gitignore                  # 忽略规则
 │
-├── docs/                      # 🌟 HDD 工程交接中心
-│   └── handovers/
-│       └── README.md          # 倒序索引表 (新会话自动感知)
+├── docs/                      # 📚 文档与交付中心
+│   ├── handovers/             #   - HDD 任务交接中心 (README.md 倒序索引)
+│   └── guides/                #   - 核心工程指南 (成熟度模型 / 目标定义 / Loop 模板)
 │
 ├── scripts/                   # 🌟 通用确定性工具箱 (纯 Node 原生)
 │   ├── check.mjs              # 安装与环境健康体检
@@ -111,10 +111,11 @@ your-project/
 │   │   ├── pre-compact.mjs    # (L3 可选) 记忆压缩快照
 │   │   └── lib/harness-context.mjs # 共享数据层
 │   └── skills/
-│       └── handover/          # HDD 交接技能 (ADR / SOP / Handover 模板)
+│       └── handover/          # HDD 通用交接技能规范 (ADR / SOP / Handover 模板)
 │
-└── .claude/                   # 🌟 Claude Code 运行时连接
-    └── settings.json          # Hook 路由注册表
+└── .claude/                   # 🔌 Claude Code 一等公民适配层
+    ├── settings.json          # Hook 路由注册表
+    └── skills/                # Claude 原生 Slash 命令 (harness-init / harness-mode 等)
 ```
 
 ---
