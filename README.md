@@ -2,8 +2,8 @@
 
 # Harness Starter
 
-一套通用、轻量、高可控的 **AI Agent Harness Engineering** 模板  
-让 AI 拥有确定性的安全带（Hooks）、单一真相源宪法（`AGENTS.md`）与工程交接范式（HDD）
+轻量、可控的 **AI Agent Harness 工程化脚手架**  
+为 AI 编程助手提供操作安全护栏（Hooks）、统一行为准则（`AGENTS.md`）与任务交接流（HDD）
 
 <p>
   <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License">
@@ -11,8 +11,8 @@
   <img src="https://img.shields.io/badge/tests-56%20passing-brightgreen" alt="56 tests passing">
 </p>
 
-> **现代 Agent 公式**：`Agent = LLM (算力大脑) + Harness (控制底盘)`  
-> 支持 **OpenAI Codex、Claude Code、Pi Coding Agent、DeepSeek dsh、ZCode** 等主流 Agent 运行环境。
+> **Agent 架构模型**：`Agent = LLM (模型计算) + Harness (控制底盘)`  
+> 兼容 **OpenAI Codex、Claude Code、Pi Coding Agent、DeepSeek dsh、ZCode** 等主流 Agent 运行环境。
 
 <br>
 
@@ -24,38 +24,38 @@ https://github.com/k1ein-chen/Harness-Starter
 
 ---
 
-## 📜 核心特性
+## 核心特性
 
-- **📜 单一真相源（`AGENTS.md`）**：沉淀 Karpathy 行为准则、6 级奥卡姆梯子（YAGNI → 最少代码）、外科手术式修改（Surgical Changes）与硬性目标定义规范。所有 Agent 打开项目即刻遵守。
-- **📋 HDD 工程交接范式（Handoff-Driven Development）**：内置 `handover` 技能，阶段性攻坚或下班收工时一键归档高保真文档（ADR / SOP / Handover），自动生成倒序索引表与【🗺️ 路由式摘要】。
-- **🛡️ 极致轻量的物理安全带（Hooks）**：
-  - `PreToolUse`：物理级硬拦截，禁止 AI 擅自修改 `.env` 或执行 `rm -rf` 等破坏性命令。
-  - `SessionStart`：新会话 5ms 极速冷启动，自动提取最新交接卡路由导引（具备空仓优雅降级，100% 保护 Prompt 缓存）。
-- **🔍 8 维确定性健康巡检（`gc-scan.mjs`）**：无模型幻觉的纯静态扫描器，检查规则完整性、Git 状态、调试残留、TODO 密度、LSP 与类型健康。
-- **📦 智能无痛升级（`upgrade.mjs`）**：版本跟踪机制（`.harness/version.json`），支持 `--dry-run`，自动区分“用户自定义”与“模板原生”文件。
+- **统一行为规范（`AGENTS.md`）**：沉淀 Karpathy 编码准则、代码最小化原则（YAGNI）、局部精准修改（Surgical Changes）与硬性目标定义规范，作为全项目 Agent 的统一基准。
+- **任务交接工作流（HDD - Handoff-Driven Development）**：内置 `handover` 技能规范，阶段任务或收工时一键归档高保真文档（ADR / SOP / Handover），自动生成倒序索引表与路由导引。
+- **操作安全护栏（Hooks）**：
+  - `PreToolUse`：物理级硬拦截，禁止 AI 擅自修改 `.env` 等敏感文件，拦截 `rm -rf` 等破坏性命令。
+  - `SessionStart`：新会话 5ms 极速冷启动，自动提取最新交接断点（具备空仓平滑降级，不破坏 Prompt 缓存）。
+- **静态健康巡检（`gc-scan.mjs`）**：确定性的静态代码与环境扫描器，检查规则完整性、Git 状态、调试残留、TODO 密度与 LSP 配置。
+- **平滑升级机制（`upgrade.mjs`）**：基于版本跟踪（`.harness/version.json`）与 `--dry-run` 预览，智能区分用户自定义内容与模板默认配置。
 
 ---
 
-## 整体架构
+## 架构流程
 
 ```mermaid
 flowchart TD
-  A[AGENTS.md 通用宪法] --> B[docs/handovers/ HDD交接中心]
-  B --> C[SessionStart 路由感知 5ms]
-  C --> D[AI 思考与工作]
-  D --> E[PreToolUse 物理安检: 防删 .env/rm -rf]
+  A[AGENTS.md 行为准则] --> B[docs/handovers/ 任务交接中心]
+  B --> C[SessionStart 冷启动注入]
+  C --> D[AI 执行任务]
+  D --> E[PreToolUse 安全拦截: 防改 .env / 防误删]
   E --> F[执行工具]
-  F --> G[收工遵循 .agents/skills/handover/ 沉淀交接卡]
+  F --> G[收工沉淀交接卡]
   G --> B
 ```
 
-| 组件 | 载体 | 职责 |
+| 模块 | 载体 | 核心职责 |
 |---|---|---|
-| **通用宪法** | `AGENTS.md` | 规定思考准则、6 级梯子、Surgical 约束与 HDD 规范 |
-| **交接中心** | `docs/handovers/` | 沉淀 ADR 架构决策、SOP 运维手册与 Handover 交接卡 |
-| **物理安检** | `.agents/hooks/pre-tool-check.mjs` | 毫秒级阻断高危操作与保护敏感配置文件 |
-| **冷启动导引** | `.agents/hooks/session-context.mjs` | 读取最新交接断点并注入新会话（空仓优雅降级） |
-| **确定性巡检** | `scripts/gc-scan.mjs` | 独立运行 / 定时 Loop 的 8 维代码与环境体检 |
+| **行为准则** | `AGENTS.md` | 明确思考准则、代码最小化约束、修改范围与交接规范 |
+| **交接中心** | `docs/handovers/` | 沉淀 ADR 架构决策、SOP 运维手册与 Handover 研发交接卡 |
+| **安全护栏** | `.agents/hooks/pre-tool-check.mjs` | 毫秒级阻断高危操作，保护关键配置文件 |
+| **冷启动注入** | `.agents/hooks/session-context.mjs` | 读取最新交接断点并注入新会话（空仓平滑降级） |
+| **健康体检** | `scripts/gc-scan.mjs` | 独立运行的静态规则、Git 状态与代码质量巡检 |
 
 ---
 
@@ -84,37 +84,37 @@ cd /path/to/your-project && node scripts/check.mjs
 
 ---
 
-## 项目结构
+## 目录结构
 
-```
+```text
 your-project/
-├── AGENTS.md                  # 🌟 通用行为宪法 (Codex/Pi/dsh/Claude 通用)
-├── CLAUDE.md                  # 🌟 Claude 门面：声明技术栈 + 指向 AGENTS.md
+├── AGENTS.md                  # 统一行为准则 (Codex / Claude Code / Pi / dsh 通用)
+├── CLAUDE.md                  # Claude 门面：声明技术栈 + 引入 AGENTS.md
 ├── .lsp.json                  # LSP 语言服务配置
-├── .gitignore                  # 忽略规则
+├── .gitignore                  # Git 忽略配置
 │
-├── docs/                      # 📚 文档与交付中心
-│   ├── handovers/             #   - HDD 任务交接中心 (README.md 倒序索引)
-│   └── guides/                #   - 核心工程指南 (成熟度模型 / 目标定义 / Loop 模板)
+├── docs/                      # 文档与交付中心
+│   ├── handovers/             #   - 任务交接记录 (README.md 倒序索引)
+│   └── guides/                #   - 工程指南 (成熟度模型 / 目标定义 / 循环模板)
 │
-├── scripts/                   # 🌟 通用确定性工具箱 (纯 Node 原生)
-│   ├── check.mjs              # 安装与环境健康体检
-│   ├── gc-scan.mjs            # 8 维确定性巡检
-│   ├── init.mjs               # 一键安装器
-│   └── upgrade.mjs            # 智能无痛升级
+├── scripts/                   # 自动化脚本 (纯 Node.js 标准库)
+│   ├── check.mjs              # 环境与配置检查
+│   ├── gc-scan.mjs            # 静态健康巡检
+│   ├── init.mjs               # 项目初始化脚本
+│   └── upgrade.mjs            # 模板版本升级
 │
-├── .agents/                   # 🌟 统一核心资产中心
-│   ├── hooks/                 # 物理级拦截与上下文脚本
-│   │   ├── pre-tool-check.mjs # 安全拦截
-│   │   ├── session-context.mjs# HDD 冷启动感知
-│   │   ├── post-tool-check.mjs# (L3 可选) 自动格式化
-│   │   ├── pre-compact.mjs    # (L3 可选) 记忆压缩快照
-│   │   └── lib/harness-context.mjs # 共享数据层
+├── .agents/                   # 通用核心资产
+│   ├── hooks/                 # 安全拦截与冷启动注入脚本
+│   │   ├── pre-tool-check.mjs # 敏感文件与危险命令拦截
+│   │   ├── session-context.mjs# 会话冷启动断点注入
+│   │   ├── post-tool-check.mjs# (可选) 代码自动格式化
+│   │   ├── pre-compact.mjs    # (可选) 会话压缩前状态快照
+│   │   └── lib/harness-context.mjs # 共享工具函数
 │   └── skills/
-│       └── handover/          # HDD 通用交接技能规范 (ADR / SOP / Handover 模板)
+│       └── handover/          # 交接技能规范 (ADR / SOP / Handover 模板)
 │
-└── .claude/                   # 🔌 Claude Code 一等公民适配层
-    ├── settings.json          # Hook 路由注册表
+└── .claude/                   # Claude Code 适配层
+    ├── settings.json          # Hook 注册配置
     └── skills/                # Claude 原生 Slash 命令 (harness-init / harness-mode 等)
 ```
 
@@ -122,31 +122,31 @@ your-project/
 
 ## 常用工作流
 
-### 1. 任务交接与每日收工（HDD 范式）
-在任何 Agent 中直接对 AI 说：
+### 1. 任务交接与收工归档
+在任何 Agent 中直接说明：
 ```text
-帮我交接一下当前任务（遵循 .agents/skills/handover/ 规范）
+帮我交接一下当前任务（参考 .agents/skills/handover/ 规范）
 ```
-AI 将会自动核实物理变更（`git status -s`），生成带【🗺️ 路由式摘要】的高保真交接文档至 `docs/handovers/`，并更新索引。
+AI 会自动读取实际变更（`git status -s`），生成包含【路由式摘要】的高保真交接文档至 `docs/handovers/`，并自动更新索引。
 
-### 2. 系统 GC 自治巡检
+### 2. 项目健康巡检
 ```bash
-# 本地手动扫描
+# 本地控制台检查
 node scripts/gc-scan.mjs
 
-# 格式化 JSON 输出（供 CI 或其他工具消费）
+# 输出结构化 JSON
 node scripts/gc-scan.mjs --json
 
-# CI 门禁检查（有 critical 告警则非零退出）
+# CI 门禁检查（存在 critical 告警则非零退出）
 node scripts/gc-scan.mjs --ci
 ```
 
-### 3. 模板升级检查
+### 3. 模板升级
 ```bash
-# 预览更新（不修改任何文件）
+# 预览更新内容（不修改文件）
 node scripts/upgrade.mjs --dry-run
 
-# 执行智能合并升级
+# 执行智能升级
 node scripts/upgrade.mjs
 ```
 

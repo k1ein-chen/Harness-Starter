@@ -1,6 +1,6 @@
-# 项目行为准则与工程宪法 (AGENTS.md)
+# 项目开发与行为准则 (AGENTS.md)
 
-> 本文件是所有 AI Agent（OpenAI Codex、Claude Code、Pi、DeepSeek dsh、ZCode 等）的通用行为规范与单一真相源。
+> 本文件是所有 AI Agent（OpenAI Codex、Claude Code、Pi、DeepSeek dsh、ZCode 等）的通用行为规范与基准约定。
 
 ---
 
