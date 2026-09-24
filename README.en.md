@@ -11,7 +11,7 @@ Empower your AI with deterministic safety belts (Hooks), a single-source-of-trut
   <img src="https://img.shields.io/badge/tests-56%20passing-brightgreen" alt="56 tests passing">
 </p>
 
-> **Modern Agent Formula**: $\text{Agent} = \text{LLM (Compute/Brain)} + \text{Harness (Control/Chassis)}$  
+> **Modern Agent Formula**: `Agent = LLM (Compute/Brain) + Harness (Control/Chassis)`  
 > Supports **OpenAI Codex, Claude Code, Pi Coding Agent, DeepSeek dsh, ZCode**, and other mainstream Agent runtimes.
 
 <br>

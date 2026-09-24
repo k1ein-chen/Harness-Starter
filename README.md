@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/tests-56%20passing-brightgreen" alt="56 tests passing">
 </p>
 
-> **现代 Agent 公式**：$\text{Agent} = \text{LLM (算力大脑)} + \text{Harness (控制底盘)}$  
+> **现代 Agent 公式**：`Agent = LLM (算力大脑) + Harness (控制底盘)`  
 > 支持 **OpenAI Codex、Claude Code、Pi Coding Agent、DeepSeek dsh、ZCode** 等主流 Agent 运行环境。
 
 <br>
