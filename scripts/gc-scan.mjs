@@ -5,13 +5,13 @@
  *
  * 用法: node scripts/gc-scan.mjs [--json] [--ci]
  *
- * 扫描维度（权威清单 — 与 harness-gc SKILL.md 保持同步）:
- *   1. CLAUDE.md 完整性 — 文件存在、必要章节、占位符
+ * 扫描维度（权威清单 — 与 AGENTS.md 保持同步）:
+ *   1. 规则完整性 — AGENTS.md/CLAUDE.md 存在、必要章节、占位符
  *   2. Git 状态 — 未提交变更数、调试残留
  *   3. TODO/FIXME 密度 — 单文件超过 5 处时报告
  *   4. .gitignore 健康 — 关键目录是否被忽略
  *   5. Hook 注册状态 — 必要 Hook 文件存在且已注册
- *   6. Harness 状态 — .harness-state 文件有效
+ *   6. Harness 状态 — state.json 有效
  *   7. TypeScript 类型检查 — tsc --noEmit（如存在 tsconfig.json）
  *   8. LSP 配置 — .lsp.json 存在且包含 TypeScript
  */
@@ -43,10 +43,11 @@ export async function scan(projectRoot, options = {}) {
         stdio: ["pipe", "pipe", "ignore"],
         ...opts,
       }).trim();
-    } catch { return ""; }
+    } catch {
+      return "";
+    }
   };
 
-  // Capture stdout+stderr even when the command fails (replaces shell redirect combo)
   const runAllowFail = (cmd) => {
     try {
       return execSync(cmd, {
@@ -65,22 +66,25 @@ export async function scan(projectRoot, options = {}) {
     findings.push({ type, severity, file, line, message, detail, ts: new Date().toISOString() });
   };
 
-  // ── 1. CLAUDE.md 完整性 ──────────────────
+  // ── 1. 规则文件完整性 ──────────────────────
 
-  const claudeMdPath = join(root, "CLAUDE.md");
-  if (!existsSync(claudeMdPath)) {
-    addFinding("missing_file", "critical", "CLAUDE.md", 0, "CLAUDE.md 缺失", "项目根缺少 CLAUDE.md");
+  const agentsPath = join(root, "AGENTS.md");
+  const claudePath = join(root, "CLAUDE.md");
+  const activeRulePath = existsSync(agentsPath) ? agentsPath : existsSync(claudePath) ? claudePath : null;
+
+  if (!activeRulePath) {
+    addFinding("missing_file", "critical", "AGENTS.md", 0, "缺少规则文件 (AGENTS.md)", "项目根缺少 AGENTS.md 或 CLAUDE.md");
   } else {
-    const content = readFileSync(claudeMdPath, "utf-8");
+    const content = readFileSync(activeRulePath, "utf-8");
     const lines = content.split("\n");
     for (const s of ["行为准则", "消除信息差", "Simplicity First", "Surgical Changes", "Goal-Driven"]) {
       if (!content.includes(s)) {
-        addFinding("missing_section", "warning", "CLAUDE.md", 0, "缺少章节: " + s, "未找到 " + s);
+        addFinding("missing_section", "warning", relative(root, activeRulePath), 0, "缺少章节: " + s, "未找到 " + s);
       }
     }
-    const todoLine = lines.findIndex(l => l.includes("【待填写"));
+    const todoLine = lines.findIndex((l) => l.includes("【待填写"));
     if (todoLine !== -1) {
-      addFinding("placeholder", "warning", "CLAUDE.md", todoLine + 1, "存在未占位符", lines[todoLine].trim());
+      addFinding("placeholder", "warning", relative(root, activeRulePath), todoLine + 1, "存在未填写占位符", lines[todoLine].trim());
     }
   }
 
@@ -111,7 +115,10 @@ export async function scan(projectRoot, options = {}) {
       for (const entry of entries) {
         const fullPath = join(dir, entry.name);
         if (entry.name.startsWith(".") || entry.name === "node_modules" || entry.name === ".git") continue;
-        if (entry.isDirectory()) { scanDir(fullPath, depth + 1); continue; }
+        if (entry.isDirectory()) {
+          scanDir(fullPath, depth + 1);
+          continue;
+        }
         if (!/\.(mjs|js|ts|tsx|jsx|md|json|yaml|yml)$/i.test(entry.name)) continue;
         if (fullPath.endsWith("gc-scan.mjs")) continue;
         const content = readFileSync(fullPath, "utf-8");
@@ -120,7 +127,9 @@ export async function scan(projectRoot, options = {}) {
           addFinding("todo_cluster", "info", relative(root, fullPath), 0, "TODO/FIXME 集中 (" + total + " 处)", total + " 处");
         }
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   };
   scanDir(root);
 
@@ -129,9 +138,9 @@ export async function scan(projectRoot, options = {}) {
   const gitignorePath = join(root, ".gitignore");
   if (existsSync(gitignorePath)) {
     const giContent = readFileSync(gitignorePath, "utf-8");
-    for (const entry of ["node_modules/", ".claude/reviews/", ".claude/loops/"]) {
+    for (const entry of ["node_modules/", ".claude/reviews/", ".harness/"]) {
       if (!giContent.includes(entry) && existsSync(join(root, entry.replace(/\/$/, "")))) {
-        addFinding("gitignore_missing", "info", ".gitignore", 0, ".gitignore 缺少: " + entry, entry + " 存在但未被忽略");
+        addFinding("gitignore_missing", "info", ".gitignore", 0, ".gitignore 建议添加: " + entry, entry + " 存在但未被忽略");
       }
     }
   } else {
@@ -140,46 +149,62 @@ export async function scan(projectRoot, options = {}) {
 
   // ── 5. Hook 注册状态 ──────────────────────
 
-  const hooksDir = join(root, ".claude/hooks");
-  if (existsSync(hooksDir)) {
-    const hooksFiles = readdirSync(hooksDir).filter(f => f.endsWith(".mjs"));
-    for (const h of ["pre-tool-check.mjs", "session-context.mjs", "session-review.mjs"]) {
+  const hooksDir = existsSync(join(root, ".agents/hooks"))
+    ? join(root, ".agents/hooks")
+    : existsSync(join(root, ".claude/hooks"))
+    ? join(root, ".claude/hooks")
+    : null;
+
+  if (hooksDir) {
+    const hooksFiles = readdirSync(hooksDir).filter((f) => f.endsWith(".mjs"));
+    for (const h of ["pre-tool-check.mjs", "session-context.mjs"]) {
       if (!hooksFiles.includes(h)) {
-        addFinding("missing_hook", "critical", ".claude/hooks/", 0, "缺失 Hook: " + h, "必备安全/上下文 Hook");
+        addFinding("missing_hook", "critical", relative(root, hooksDir), 0, "缺失 Hook: " + h, "必备安全/上下文 Hook");
       }
     }
+
     const settingsPath = join(root, ".claude/settings.json");
     if (existsSync(settingsPath)) {
       const sc = readFileSync(settingsPath, "utf-8");
-      const map = { "pre-tool-check.mjs": "PreToolUse", "post-tool-check.mjs": "PostToolUse", "session-context.mjs": "SessionStart", "session-review.mjs": "Stop", "pre-compact.mjs": "PreCompact" };
+      const map = {
+        "pre-tool-check.mjs": "PreToolUse",
+        "post-tool-check.mjs": "PostToolUse",
+        "session-context.mjs": "SessionStart",
+        "pre-compact.mjs": "PreCompact",
+      };
       for (const h of hooksFiles) {
         const ev = map[h];
         if (!ev) continue;
         const isRegistered = sc.includes(ev) && sc.includes(h);
-        const isCommented = sc.includes("// " + ev);
+        const isCommented = sc.includes("// " + ev) || sc.includes("// \"" + ev + "\"");
         if (!isRegistered) {
-          addFinding("hook_not_registered", "warning", ".claude/settings.json", 0, "Hook 未注册: " + h + (isCommented ? " (被注释)" : ""), "请在 settings.json 中注册");
+          addFinding("hook_not_registered", "warning", ".claude/settings.json", 0, "Hook 未注册: " + h + (isCommented ? " (被注释)" : ""), "可在 settings.json 中注册");
         }
       }
     }
   } else {
-    addFinding("missing_dir", "critical", ".claude/hooks/", 0, "Hooks 目录缺失");
+    addFinding("missing_dir", "info", ".agents/hooks/", 0, "未检测到本地 Hook 目录（底座模式运行）");
   }
 
   // ── 6. Harness 状态 ────────────────────────
 
-  const statePath = join(root, ".claude/.harness-state");
-  if (existsSync(statePath)) {
+  const statePath = existsSync(join(root, ".harness/state.json"))
+    ? join(root, ".harness/state.json")
+    : existsSync(join(root, ".claude/.harness-state"))
+    ? join(root, ".claude/.harness-state")
+    : null;
+
+  if (statePath) {
     try {
       const state = JSON.parse(readFileSync(statePath, "utf-8"));
       if (!state.phase || !state.mode) {
-        addFinding("harness_state_invalid", "warning", ".claude/.harness-state", 0, ".harness-state 缺少必要字段", "需要 phase 和 mode");
+        addFinding("harness_state_invalid", "warning", relative(root, statePath), 0, "state 缺少必要字段", "需要 phase 和 mode");
       }
     } catch {
-      addFinding("harness_state_invalid", "warning", ".claude/.harness-state", 0, ".harness-state JSON 解析失败", "文件可能已损坏");
+      addFinding("harness_state_invalid", "warning", relative(root, statePath), 0, "state JSON 解析失败", "文件可能已损坏");
     }
   } else {
-    addFinding("missing_file", "info", ".claude/.harness-state", 0, ".harness-state 缺失", "初始化时自动创建");
+    addFinding("missing_file", "info", ".harness/state.json", 0, "Harness 状态文件未初始化", "运行中自动创建");
   }
 
   // ── 7. TypeScript 类型检查 ────────────────
@@ -252,19 +277,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       console.log("");
     }
   }
-
-  // 持久化到 LOG.md
-  const loopsDir = join(defaultProjectRoot, ".claude/loops");
-  if (!existsSync(loopsDir)) mkdirSync(loopsDir, { recursive: true });
-  const logPath = join(loopsDir, "LOG.md");
-  let logContent = existsSync(logPath) ? readFileSync(logPath, "utf-8") : "";
-  const logLine = "| " + result.timestamp + " | auto | " + result.summary.total + " (" + result.summary.critical + "c " + result.summary.warning + "w " + result.summary.info + "i) | — |";
-  if (logContent.trim().split("\n").filter(l => l.includes("|")).length <= 2) {
-    logContent += "\n" + logLine;
-  } else {
-    logContent = logContent.trimEnd() + "\n" + logLine;
-  }
-  writeFileSync(logPath, logContent + "\n", "utf-8");
 
   if (isCi && result.summary.critical > 0) process.exit(1);
 }

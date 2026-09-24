@@ -24,12 +24,10 @@ export function createVirtualProject(fileMap = {}) {
     const fullPath = join(projectRoot, relPath);
 
     if (content === null) {
-      // 仅创建目录
       mkdirSync(fullPath, { recursive: true });
       continue;
     }
 
-    // 确保父目录存在
     const dir = fullPath.includes("/") || fullPath.includes("\\")
       ? fullPath.replace(/[/\\][^/\\]+$/, "")
       : fullPath;
@@ -45,36 +43,28 @@ export function createVirtualProject(fileMap = {}) {
     cleanup: () => {
       try {
         rmSync(projectRoot, { recursive: true, force: true });
-      } catch {
-        // 忽略清理错误
-      }
+      } catch {}
     },
   };
 }
 
-/**
- * 把一个对象的所有键值对展平为简单的键值对（方便在 fileMap 里用）。
- * 如果需要深层 key，直接在 fileMap 里写完整路径。
- */
 export const Fixtures = {
-  minimalClaudeMd:
-    "# 项目概要\n用途：测试项目\n技术栈：Node.js\n跑测试：npm test\n\n# 行为准则\n## Think Before Coding\n- 假设说清楚\n## 消除信息差\n- 追问\n## Simplicity First\n- 不多写一行\n## Surgical Changes\n- 只动必须动的代码\n## Goal-Driven\n- 目标可验证\n",
+  minimalAgentsMd:
+    "# 项目规范\n## 行为准则\n### Think Before Coding\n### 消除信息差\n### Simplicity First\n### Surgical Changes\n### Goal-Driven\n",
+
+  completeAgentsMd:
+    "# 项目规范\n## 行为准则\n### Think Before Coding\n### 消除信息差\n### 讨论与执行分离\n### Simplicity First\n### Surgical Changes\n### Goal-Driven\n",
 
   completeClaudeMd:
-    "# 项目概要\n用途：测试项目\n技术栈：Node.js\n跑测试：npm test\n\n# 行为准则\n## Think Before Coding\n- 假设说清楚\n## 消除信息差\n- 追问\n## 讨论与执行分离\n- 不修改文件\n## Simplicity First\n- 不多写一行\n## Surgical Changes\n- 只动必须动的代码\n## Goal-Driven\n- 目标可验证\n",
-
-  placeholderClaudeMd:
-    "# 项目概要\n用途：【待填写】\n技术栈：【待填写】\n\n# 行为准则\n## Think Before Coding\n## 消除信息差\n## Simplicity First\n## Surgical Changes\n## Goal-Driven\n",
+    "# 项目概要\n用途：测试项目\n技术栈：Node.js\n跑测试：npm test\n\n# 行为准则\n## Think Before Coding\n## 消除信息差\n## 讨论与执行分离\n## Simplicity First\n## Surgical Changes\n## Goal-Driven\n",
 
   minimalSettingsJson:
-    '{\n  "hooks": {\n    "PreToolUse": [{"matcher": "", "hooks": [{"type": "command", "command": "node .claude/hooks/pre-tool-check.mjs"}]}],\n    "SessionStart": [{"matcher": "", "hooks": [{"type": "command", "command": "node .claude/hooks/session-context.mjs"}]}],\n    "Stop": [{"matcher": "", "hooks": [{"type": "command", "command": "node .claude/hooks/session-review.mjs"}]}]\n  }\n}',
+    '{\n  "hooks": {\n    "PreToolUse": [{"type": "command", "command": "node .agents/hooks/pre-tool-check.mjs"}],\n    "SessionStart": [{"type": "command", "command": "node .agents/hooks/session-context.mjs"}]\n  }\n}',
 
-  minimalLspJson: '{\n  "languages": {\n    "typescript": {\n      "command": "typescript-language-server",\n      "args": ["--stdio"],\n      "extensions": [".ts", ".tsx", ".js", ".jsx"]\n    }\n  }\n}',
+  minimalLspJson:
+    '{\n  "languages": {\n    "typescript": {\n      "command": "typescript-language-server",\n      "args": ["--stdio"],\n      "extensions": [".ts", ".tsx", ".js", ".jsx"]\n    }\n  }\n}',
 
-  minimalGitignore: "node_modules/\n.claude/reviews/\n.claude/loops/\n",
+  minimalGitignore: "node_modules/\n.harness/\n",
 
   minimalHarnessState: '{"phase": "build", "mode": "full"}',
-
-  minimalStateMd:
-    "**Phase**: idle\n**Last Run**: never\n**Mode**: full\n**Findings Open**: 0\n\n| Active Loop | Interval | Last Run | Status |\n|-------------|----------|----------|--------|\n",
 };

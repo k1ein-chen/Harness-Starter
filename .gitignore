@@ -1,4 +1,8 @@
 node_modules/
+.harness/reviews/
+.harness/loops/
+.harness/.upgrade-backups/
+.harness/.upgrade-tmp/
 .claude/reviews/
 .claude/loops/
 .claude/.upgrade-backups/

@@ -1,5 +1,5 @@
 /**
- * PostToolUse Hook — 在 Write/Edit 后自动格式化。
+ * PostToolUse Hook — 在 Write/Edit 后自动格式化（L3 可选）
  *
  * 策略：先 check 再 write，只在格式有问题时才触发格式化。
  * 环境变量：
@@ -19,7 +19,7 @@ if (process.env.HARNESS_POSTTOOL_FORMAT === "0") process.exit(0);
 
 const skipPatterns = (process.env.HARNESS_POSTTOOL_FORMAT_SKIP_PATTERNS || "")
   .split(",")
-  .map(s => s.trim())
+  .map((s) => s.trim())
   .filter(Boolean);
 
 // Formatter 定义：{ check: 检测路径, checkCmd: 检查命令, writeCmd: 写入命令 }
@@ -60,8 +60,7 @@ if ((tool === "Write" || tool === "Edit") && filePath) {
   // 检查跳过规则
   if (skipPatterns.length > 0) {
     const fileName = filePath.split("/").pop() || filePath.split("\\").pop() || filePath;
-    const shouldSkip = skipPatterns.some(p => {
-      // 简单 glob 匹配（支持 * 通配符）
+    const shouldSkip = skipPatterns.some((p) => {
       const regex = new RegExp("^" + p.replace(/\*/g, ".*").replace(/\./g, "\\.") + "$");
       return regex.test(fileName) || regex.test(filePath);
     });
@@ -80,8 +79,11 @@ if ((tool === "Write" || tool === "Edit") && filePath) {
 
   // 先 check：如果格式已正确，跳过
   try {
-    execSync(formatter.checkCmd(filePath), { cwd: projectRoot, timeout: 5000, stdio: "pipe" });
-    // check 成功 → 格式正确，无需操作
+    execSync(formatter.checkCmd(filePath), {
+      cwd: projectRoot,
+      timeout: 5000,
+      stdio: ["pipe", "pipe", "ignore"],
+    });
     process.exit(0);
   } catch {
     // check 失败 → 需要格式化
@@ -89,8 +91,11 @@ if ((tool === "Write" || tool === "Edit") && filePath) {
 
   // 执行格式化
   try {
-    execSync(formatter.writeCmd(filePath), { cwd: projectRoot, timeout: 5000, stdio: "pipe" });
-    // 仅当格式化确实执行时才输出日志
+    execSync(formatter.writeCmd(filePath), {
+      cwd: projectRoot,
+      timeout: 5000,
+      stdio: ["pipe", "pipe", "ignore"],
+    });
     const relativePath = filePath.startsWith(projectRoot)
       ? filePath.slice(projectRoot.length + 1)
       : filePath;

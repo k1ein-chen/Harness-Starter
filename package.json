@@ -1,16 +1,19 @@
 {
   "name": "harness-starter",
   "version": "1.0.0",
-  "description": "Claude Code Harness Engineering starter template",
+  "description": "Universal AI Agent Harness Engineering starter template (Codex, Claude Code, Pi, dsh)",
   "license": "MIT",
   "keywords": [
+    "agent-harness",
     "claude-code",
-    "harness",
+    "codex",
+    "pi-agent",
+    "deepseek-harness",
     "hooks",
     "starter",
     "template"
   ],
-  "repository": "chenklein26-maker/Harness-Starter",
+  "repository": "k1ein-chen/Harness-Starter",
   "type": "module",
   "bin": {
     "harness-init": "./scripts/init.mjs"
@@ -22,11 +25,13 @@
     "vitest": "^2.1.9"
   },
   "files": [
+    "AGENTS.md",
     "CLAUDE.md",
     ".lsp.json",
     ".gitignore",
-    "scripts/init.mjs",
-    "scripts/check.mjs",
+    "scripts/",
+    "docs/",
+    ".agents/",
     ".claude/",
     ".github/",
     "README.md",

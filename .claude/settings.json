@@ -1,35 +1,28 @@
 {
   "hooks": {
-    // L2 核心 Hook — 默认启用
     "PreToolUse": [
       {
         "type": "command",
-        "command": "node .claude/hooks/pre-tool-check.mjs"
+        "command": "node .agents/hooks/pre-tool-check.mjs"
       }
     ],
     "SessionStart": [
       {
         "type": "command",
-        "command": "node .claude/hooks/session-context.mjs"
-      }
-    ],
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node .claude/hooks/session-review.mjs"
+        "command": "node .agents/hooks/session-context.mjs"
       }
     ]
     // L3 进阶：取消注释以下 Hook 启用
     // "PostToolUse": [
     //   {
     //     "matcher": "",
-    //     "hooks": [{"type": "command", "command": "node .claude/hooks/post-tool-check.mjs"}]
+    //     "hooks": [{"type": "command", "command": "node .agents/hooks/post-tool-check.mjs"}]
     //   }
     // ],
     // "PreCompact": [
     //   {
     //     "matcher": "",
-    //     "hooks": [{"type": "command", "command": "node .claude/hooks/pre-compact.mjs"}]
+    //     "hooks": [{"type": "command", "command": "node .agents/hooks/pre-compact.mjs"}]
     //   }
     // ]
   },

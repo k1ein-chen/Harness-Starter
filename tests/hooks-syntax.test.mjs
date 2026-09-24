@@ -1,9 +1,7 @@
 /**
  * tests/hooks-syntax.test.mjs — 对真实 Hook/脚本源码做语法检查
  *
- * 此前测试只用 "// stub" 打桩，漏掉了生产代码的语法错误
- * （如 pre-tool-check.mjs 缺闭合括号）。本文件直接对仓库内
- * 真实 .mjs 文件跑 node --check，防止回归。
+ * 对仓库内真实 .mjs 文件跑 node --check，并保证无 Unix shell 专有语法。
  */
 
 import { describe, it, expect } from "vitest";
@@ -29,6 +27,7 @@ function collectMjs(dir) {
 }
 
 const targets = [
+  ...collectMjs(join(repoRoot, ".agents", "hooks")),
   ...collectMjs(join(repoRoot, ".claude", "hooks")),
   ...collectMjs(join(repoRoot, "scripts")),
 ].filter((p) => statSync(p).isFile());

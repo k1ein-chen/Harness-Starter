@@ -12,7 +12,7 @@ description: Initialize this project with the Harness Engineering starter templa
 
 ## Step 0：检查模板文件是否存在
 
-检查项目根目录下是否有 `.claude/hooks/` 和 `CLAUDE.md`。
+检查项目根目录下是否有 `.agents/hooks/` 和 `AGENTS.md`。
 
 ### 如果不存在（GitHub 安装场景）
 
@@ -24,13 +24,14 @@ description: Initialize this project with the Harness Engineering starter templa
    ```
 2. 复制核心文件到项目：
    ```
+   cp -r /tmp/harness-starter/.agents/  .agents/
    cp -r /tmp/harness-starter/.claude/  .claude/
+   cp -r /tmp/harness-starter/docs/     docs/
+   cp    /tmp/harness-starter/AGENTS.md ./
    cp    /tmp/harness-starter/CLAUDE.md ./
    cp    /tmp/harness-starter/.lsp.json ./
    cp    /tmp/harness-starter/.gitignore ./.gitignore 2>/dev/null || true
    cp -r /tmp/harness-starter/scripts/  ./scripts/ 2>/dev/null || true
-   mkdir -p .github/workflows 2>/dev/null
-   cp -r /tmp/harness-starter/.github/ ./.github/ 2>/dev/null || true
    ```
 3. 清理临时目录
 4. 继续执行 Step 1
@@ -129,16 +130,15 @@ description: Initialize this project with the Harness Engineering starter templa
 
 ## Step 4: 检查 Hook 文件
 
-检查 `.claude/hooks/` 下五个文件是否存在：
-- `pre-tool-check.mjs` — 防止 AI 修改 .env
-- `post-tool-check.mjs` — 自动格式化
-- `pre-compact.mjs` — 长会话保留 Loop 状态
-- `session-context.mjs` — 自动注入 git 状态 + Loop 状态
-- `session-review.mjs` — 对话结束生成审查报告 + GC 扫描
+检查 `.agents/hooks/` 下核心文件是否存在：
+- `pre-tool-check.mjs` — 防止 AI 修改 .env / 高危命令
+- `session-context.mjs` — 自动注入 git 状态 + 最新交接断点
+- `post-tool-check.mjs` — （可选）自动格式化
+- `pre-compact.mjs` — （可选）压缩前保存状态快照
 
 缺失则从模板复制。已有则跳过，不要覆盖。
 
-检查 `.claude/settings.json` 中是否注册了所有 Hook（PreToolUse / PostToolUse / PreCompact / SessionStart / Stop）。
+检查 `.claude/settings.json` 中是否注册了 Hook（PreToolUse / SessionStart 等）。
 缺失则补充，已有的其他配置不要删除。
 
 ## Step 5: 检查并安装 LSP
@@ -161,14 +161,13 @@ description: Initialize this project with the Harness Engineering starter templa
 执行 `node scripts/check.mjs`，向用户展示结果。
 如果有失败项，逐一处理。
 
-可选：向用户介绍 GC Agent：
+可选：向用户介绍 GC 扫描：
 - `node scripts/gc-scan.mjs` — 手动执行 8 维度健康扫描
-- `/loop 24h "node scripts/gc-scan.mjs"` — 定时自动扫描
-- 扫描结果持久化在 `.claude/loops/LOG.md`
+- 扫描结果输出或通过 CI 门禁检查
 
 ## Step 8: 完成提示
 
 向用户说明当前 Harness 状态：
-- 已启用的 Hook（PreToolUse / SessionStart / Stop / PreCompact）
-- 已安装的依赖（LSP / OpenSpec / codegraph）
+- 已启用的 Hook（PreToolUse / SessionStart）
+- 已安装的依赖（LSP / OpenSpec）
 - 还需要用户手动做的事（如果有）

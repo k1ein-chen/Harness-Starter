@@ -2,7 +2,7 @@
  * tests/init.test.mjs — init.mjs 安装逻辑测试
  */
 
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync, mkdirSync, rmSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -22,11 +22,13 @@ function createTempDir() {
 }
 
 function cleanup(dir) {
-  try { rmSync(dir, { recursive: true, force: true }); } catch {}
+  try {
+    rmSync(dir, { recursive: true, force: true });
+  } catch {}
 }
 
 describe("init.mjs: 基础安装", () => {
-  it("安装到空目录 → 创建核心文件", () => {
+  it("安装到空目录 → 创建核心规则、.agents 与交接体系", () => {
     const target = createTempDir();
     try {
       execSync(`node "${initScript}" "${target}"`, {
@@ -34,11 +36,12 @@ describe("init.mjs: 基础安装", () => {
         encoding: "utf-8",
         timeout: 10000,
       });
+      expect(existsSync(join(target, "AGENTS.md"))).toBe(true);
       expect(existsSync(join(target, "CLAUDE.md"))).toBe(true);
-      expect(existsSync(join(target, ".claude"))).toBe(true);
-      expect(existsSync(join(target, ".lsp.json"))).toBe(true);
-      expect(existsSync(join(target, ".gitignore"))).toBe(true);
-      expect(existsSync(join(target, ".claude", ".harness-state"))).toBe(true);
+      expect(existsSync(join(target, ".agents", "hooks", "pre-tool-check.mjs"))).toBe(true);
+      expect(existsSync(join(target, ".agents", "skills", "handover", "SKILL.md"))).toBe(true);
+      expect(existsSync(join(target, "docs", "handovers", "README.md"))).toBe(true);
+      expect(existsSync(join(target, ".claude", "settings.json"))).toBe(true);
     } finally {
       cleanup(target);
     }
@@ -52,7 +55,7 @@ describe("init.mjs: 基础安装", () => {
         encoding: "utf-8",
         timeout: 10000,
       });
-      const verPath = join(target, ".claude", ".harness-version");
+      const verPath = join(target, ".harness", "version.json");
       expect(existsSync(verPath)).toBe(true);
       const ver = JSON.parse(readFileSync(verPath, "utf-8"));
       expect(ver).toHaveProperty("version");
@@ -72,7 +75,7 @@ describe("init.mjs: 基础安装", () => {
         timeout: 10000,
       });
       expect(existsSync(target)).toBe(true);
-      expect(existsSync(join(target, "CLAUDE.md"))).toBe(true);
+      expect(existsSync(join(target, "AGENTS.md"))).toBe(true);
     } finally {
       cleanup(parent);
     }
@@ -81,13 +84,11 @@ describe("init.mjs: 基础安装", () => {
   it("已存在的文件 → 跳过", () => {
     const target = createTempDir();
     try {
-      // 先运行一次
       execSync(`node "${initScript}" "${target}"`, {
         cwd: projectRoot,
         encoding: "utf-8",
         timeout: 10000,
       });
-      // 第二次运行，输出应包含 "已存在，跳过"
       const output = execSync(`node "${initScript}" "${target}"`, {
         cwd: projectRoot,
         encoding: "utf-8",

@@ -2,7 +2,7 @@
 /**
  * Harness Starter — 一键安装脚本
  *
- * 安装 L2 核心到目标项目。L3+ 进阶功能留在 GitHub 仓库，手动追加。
+ * 安装通用 Agent Harness 核心到目标项目。
  *
  * 用法:
  *   npx harness-starter                    # 安装到当前目录
@@ -12,7 +12,7 @@
  */
 
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join, dirname, resolve, relative } from "path";
+import { join, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -20,37 +20,45 @@ const templateRoot = join(__dirname, "..");
 
 const args = process.argv.slice(2);
 const force = args.includes("--force");
-const targetArg = args.filter(a => a !== "--force")[0];
+const targetArg = args.filter((a) => a !== "--force")[0];
 const target = targetArg ? resolve(targetArg) : process.cwd();
 
-// L2 核心文件清单 — 精确到文件，不递归复制目录
+// 核心文件清单
 const FILES = [
-  // 项目根
+  // 1. 核心规则与配置
+  { src: "AGENTS.md", dir: false },
   { src: "CLAUDE.md", dir: false },
   { src: ".lsp.json", dir: false },
   { src: ".gitignore", dir: false },
 
-  // 脚本
+  // 2. 通用脚本
   { src: "scripts/check.mjs", dir: false },
   { src: "scripts/init.mjs", dir: false },
+  { src: "scripts/gc-scan.mjs", dir: false },
 
-  // Hook 配置
+  // 3. HDD 交付中心
+  { src: "docs/handovers/README.md", dir: false },
+
+  // 4. Hook 路由配置
   { src: ".claude/settings.json", dir: false },
-  { src: ".claude/.harness-state", dir: false },
-  { src: ".claude/.harness-version", dir: false },
 
-  // L2 核心 Hook（3 个）
-  { src: ".claude/hooks/pre-tool-check.mjs", dir: false },
-  { src: ".claude/hooks/session-context.mjs", dir: false },
-  { src: ".claude/hooks/session-review.mjs", dir: false },
-  { src: ".claude/hooks/lib/harness-context.mjs", dir: false },
+  // 5. .agents 核心 Hook 与共享层
+  { src: ".agents/hooks/pre-tool-check.mjs", dir: false },
+  { src: ".agents/hooks/session-context.mjs", dir: false },
+  { src: ".agents/hooks/lib/harness-context.mjs", dir: false },
 
-  // L2 核心 Skill（2 个）
+  // 6. .agents HDD 交接技能 (ADR / SOP / Handover)
+  { src: ".agents/skills/handover/SKILL.md", dir: false },
+  { src: ".agents/skills/handover/references/adr_template.md", dir: false },
+  { src: ".agents/skills/handover/references/sop_template.md", dir: false },
+  { src: ".agents/skills/handover/references/handover_template.md", dir: false },
+
+  // 7. 辅助向导 Skill
   { src: ".claude/skills/harness-init/SKILL.md", dir: false },
   { src: ".claude/skills/harness-mode/SKILL.md", dir: false },
 ];
 
-console.log("\n=== Harness Starter 安装（L2 核心） ===\n");
+console.log("\n=== Harness Starter 安装 ===\n");
 console.log(`目标路径: ${target}\n`);
 
 if (!existsSync(target)) {
@@ -88,28 +96,31 @@ for (const { src, dir } of FILES) {
 }
 
 // 写入版本标记
-const versionPath = join(target, ".claude", ".harness-version");
-const versionDir = join(target, ".claude");
-if (!existsSync(versionDir)) mkdirSync(versionDir, { recursive: true });
+const harnessDir = join(target, ".harness");
+if (!existsSync(harnessDir)) mkdirSync(harnessDir, { recursive: true });
+const claudeDir = join(target, ".claude");
+if (!existsSync(claudeDir)) mkdirSync(claudeDir, { recursive: true });
+
 const pkg = JSON.parse(readFileSync(join(templateRoot, "package.json"), "utf-8"));
-writeFileSync(versionPath, JSON.stringify({
-  version: pkg.version || "1.0.0",
-  installed: new Date().toISOString(),
-}, null, 2) + "\n", "utf-8");
-console.log("\n✅ 版本标记: .claude/.harness-version");
+const versionData = JSON.stringify(
+  {
+    version: pkg.version || "1.0.0",
+    installed: new Date().toISOString(),
+  },
+  null,
+  2
+) + "\n";
+
+writeFileSync(join(harnessDir, "version.json"), versionData, "utf-8");
+writeFileSync(join(claudeDir, ".harness-version"), versionData, "utf-8");
+console.log("\n✅ 版本标记: .harness/version.json");
 
 console.log(`\n📊 结果: ${installed} 已安装, ${skipped} 已跳过\n`);
 
 console.log("💡 下一步:");
 console.log(`   1. cd ${target === process.cwd() ? "." : target}`);
-console.log("   2. 在 Claude Code 中输入：帮我初始化 Harness");
-console.log("   3. AI 会自动检测技术栈并完成配置\n");
-
-console.log("🔧 想启用 L3+ 高级功能？");
-console.log("   详见 https://github.com/chenklein26-maker/Harness-Starter");
-console.log("   或手动复制：");
-console.log("   L3 自动格式化 → cp .claude/hooks/post-tool-check.mjs 到项目 + 注册到 settings.json");
-console.log("   L4 GC 扫描器 → cp scripts/gc-scan.mjs + .claude/skills/harness-gc/\n");
+console.log("   2. 在任何 AI Agent（Codex / Claude Code / Pi / dsh）中打开项目");
+console.log("   3. 自动读取 AGENTS.md 准则，阶段收工时遵循 .agents/skills/handover/ 归档\n");
 
 if (skipped > 0) {
   console.log("💡 提示: 使用 --force 可覆盖已有文件\n");

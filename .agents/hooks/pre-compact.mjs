@@ -4,14 +4,18 @@
  */
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { getGitContext, getLoopState, getReviewSummary } from "./lib/harness-context.mjs";
+import {
+  getGitContext,
+  getHarnessState,
+  getLatestHandoverSummary,
+} from "./lib/harness-context.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "../..");
 
 const lines = ["[PreCompact: 会话状态快照]", ""];
 
-// Git 上下文
+// 1. Git 上下文
 const git = getGitContext(projectRoot);
 if (git) {
   lines.push("当前分支: " + git.branch);
@@ -28,18 +32,17 @@ if (git) {
   }
 }
 
-// Loop 状态
-const loop = getLoopState(projectRoot);
-if (loop) {
-  lines.push("Loop Phase: " + loop.phase);
-  lines.push("Last Loop Run: " + loop.lastRun);
+// 2. Harness 状态
+const harness = getHarnessState(projectRoot);
+if (harness) {
+  lines.push("Harness 状态: 阶段=" + harness.phase + " | 模式=" + harness.mode);
   lines.push("");
 }
 
-// 审查报告累积
-const review = getReviewSummary(projectRoot);
-if (review && review.count > 0) {
-  lines.push("审查报告: " + review.count + " 次已累积");
+// 3. 最新交接断点
+const handover = getLatestHandoverSummary(projectRoot);
+if (handover) {
+  lines.push(`最新交接归档 [${handover.date}]: ${handover.title}`);
   lines.push("");
 }
 
